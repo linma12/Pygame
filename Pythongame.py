@@ -5,66 +5,51 @@ pygame.init() #to do all the time at the beginning of the code
 win = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("First Game")
 
-walk_right = [pygame.image.load('Golem_01_Walking_000.png'),
-                pygame.image.load('Golem_01_Walking_001.png'),
-                pygame.image.load('Golem_01_Walking_002.png'),
-                pygame.image.load('Golem_01_Walking_003.png'),
-                pygame.image.load('Golem_01_Walking_004.png'),
-                pygame.image.load('Golem_01_Walking_005.png'),
-                pygame.image.load('Golem_01_Walking_006.png'),
-                pygame.image.load('Golem_01_Walking_007.png'),
-                pygame.image.load('Golem_01_Walking_008.png'),
-                pygame.image.load('Golem_01_Walking_009.png'),
-                pygame.image.load('Golem_01_Walking_010.png'),
-                pygame.image.load('Golem_01_Walking_011.png'),
-                pygame.image.load('Golem_01_Walking_012.png'),
-                pygame.image.load('Golem_01_Walking_013.png'),
-                pygame.image.load('Golem_01_Walking_014.png'),
-                pygame.image.load('Golem_01_Walking_015.png'),
-                pygame.image.load('Golem_01_Walking_016.png'),
-                pygame.image.load('Golem_01_Walking_017.png')
-            ]
+# This goes outside the while loop, near the top of the program
+walk_right = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png'), pygame.image.load('R9.png')]
+walk_left = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png'), pygame.image.load('L5.png'), pygame.image.load('L6.png'), pygame.image.load('L7.png'), pygame.image.load('L8.png'), pygame.image.load('L9.png')]
+bg = pygame.image.load('bg.jpg')
+char = pygame.image.load('standing.png')
 
-walk_left = [pygame.image.load('Golem_01_Walking_017.png'),
-                pygame.image.load('Golem_01_Walking_016.png'),
-                pygame.image.load('Golem_01_Walking_015.png'),
-                pygame.image.load('Golem_01_Walking_014.png'),
-                pygame.image.load('Golem_01_Walking_013.png'),
-                pygame.image.load('Golem_01_Walking_012.png'),
-                pygame.image.load('Golem_01_Walking_011.png'),
-                pygame.image.load('Golem_01_Walking_010.png'),
-                pygame.image.load('Golem_01_Walking_009.png'),
-                pygame.image.load('Golem_01_Walking_008.png'),
-                pygame.image.load('Golem_01_Walking_007.png'),
-                pygame.image.load('Golem_01_Walking_006.png'),
-                pygame.image.load('Golem_01_Walking_005.png'),
-                pygame.image.load('Golem_01_Walking_004.png'),
-                pygame.image.load('Golem_01_Walking_003.png'),
-                pygame.image.load('Golem_01_Walking_003.png'),
-                pygame.image.load('Golem_01_Walking_001.png'),
-                pygame.image.load('Golem_01_Walking_000.png')
-            ]
-bg = pygame.image.load('Golem_01_Walking_000.png')
-char = pygame.image.load('Golem_01_Walking_000.png')
+clock = pygame.time.Clock()
+class player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 5
+        self.is_jump = False
+        self.jump_count = 10
+        self.left = False
+        self.right = False
+        self.walk_count = 0
 
-screen_width = 500
-screen_heigth = 500
-x = 100
-y = 100
-width = 40
-height = 60
-vel = 5
+    def draw(self, win):
+        if self.walk_count + 1 >= 27:
+            self.walk_count = 0
+        if self.left:
+            win.blit(walk_left[self.walk_count//3], (self.x,self.y)) #integer division
+            self.walk_count += 1
+        elif self.right:
+            win.blit(walk_right[self.walk_count//3], (self.x,self.y))
+            self.walk_count += 1
+        else:
+            win.blit(char, (self.x, self.y))
 
-is_jump = False
-jump_count = 10
-left = False
-right = False
-walk_count = 0
+def redraw_game_window():
+    win.blit(bg,(0,0))
+    #pygame.draw.rect(win, (255, 0, 0), (x, y, width, height))
+    man.draw(win)
+    pygame.display.update()
 
 #all pygame programs have a main loop
+#mainloop
+man = player(300, 410, 64, 64)
 run = True
 while run:
-    pygame.time.delay(100)
+    #pygame.time.delay(27)
+    clock.tick(27)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -72,30 +57,37 @@ while run:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and x > vel:
-        x -= vel
-    if keys[pygame.K_RIGHT] and x < screen_width - width - vel:
-        x += vel
-    if not(is_jump):
+    if keys[pygame.K_LEFT] and man.x > man.vel:
+        man.x -= man.vel
+        man.left = True
+        man.right = False
+    elif keys[pygame.K_RIGHT] and man.x < 500 - man.width - man.vel:
+        man.x += man.vel
+        man.left = False
+        man.right = True
+    else:
+        man.right = False
+        man.left = False
+        man.walk_count = 0
+    if not(man.is_jump):
         # if keys[pygame.K_UP] and y > vel:
         #     y -= vel
         # if keys[pygame.K_DOWN] and y < screen_heigth - height - vel:
         #     y += vel
-        if keys[pygame.K_SPACE] and y > vel:
-            is_jump = True
+        if keys[pygame.K_SPACE] and man.y > man.vel:
+            man.is_jump = True
     else:
-        if jump_count >= -10:
+        if man.jump_count >= -10:
             neg = 1
-            if jump_count < 0:
+            if man.jump_count < 0:
                 neg = -1
-            y -= (jump_count ** 2) * 0.5 * neg
-            jump_count -= 1
+            man.y -= (man.jump_count ** 2) * 0.5 * neg
+            man.jump_count -= 1
         else:
-            is_jump = False
-            jump_count = 10
+            man.is_jump = False
+            man.jump_count = 10
 
-    win.fill((0,0,0))
-    pygame.draw.rect(win, (255, 0, 0), (x, y, width, height))
-    pygame.display.update()
+    redraw_game_window()
+
 
 pygame.quit()
